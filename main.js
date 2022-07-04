@@ -5,6 +5,16 @@
 // LocalStorage
 // Single Responsibility Principle
 
+const weatherData = {
+    country: '',
+    city: '',
+    API_KEY: '3369900f5b58c49516413f8ecdb9439d',
+    async getWeather() {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${this.city},${this.country}&units=metric&appid=${this.API_KEY}`)
+        const data = await response.json();
+        console.log(data);
+    }
+};
 const UI = {
     loadSelector() {
         const cityElm = document.querySelector('#city');
@@ -31,23 +41,50 @@ const UI = {
             messageElm
         }
     },
+    hideMessage() {
+        const messageElm = document.querySelector('#message');
+        setTimeout(() => {
+            messageElm.remove();
+        }, 2000)
+    },
     showMessage(msg) {
         const {messageElm} = this.loadSelector();
-        messageElm.textContent = msg;
+        const elm = `<div class="alert alert-danger" id="message" role="alert">
+                        ${msg}
+                    </div>`
+        messageElm.insertAdjacentHTML('afterbegin', elm);
+        this.hideMessage();
 
     },
     validateInput(country, city) {
         if(country === '' | city === '') {
             this.showMessage('Please provide necessary information');
+            return true;
+        } else {
+            return false;
         }
     },
     getInputValues() {
         const { countryElm, cityElm } = this.loadSelector();
-        this.validateInput(countryElm.value, cityElm.value);
+
+        //get the result
+        const isInValid = this.validateInput(countryElm.value, cityElm.value);
+        if(isInValid) return;
+
         return { 
-            ...countryElm.value, 
-            ...cityElm.value
+           country: countryElm.value, 
+            city: cityElm.value
         }
+    },
+    resetInputs() {
+
+        const { countryElm, cityElm } = this.loadSelector();
+        countryElm.value = '';
+        cityElm.value = '';
+    },
+    handleRemoteData() {
+
+        weatherData.getWeather();
     },
     init() {
         const { formElm } = this.loadSelector();
@@ -55,7 +92,18 @@ const UI = {
             e.preventDefault();
 
             // get input values
-            this.getInputValues();
+            const {country, city} = this.getInputValues();
+
+            // set data to data layer
+            weatherData.country = country;
+            weatherData.city = city;
+            
+            // reset input
+            this.resetInputs();
+
+            // send data to API Server
+            this.handleRemoteData();
+
         })
 
     }
@@ -63,7 +111,7 @@ const UI = {
 UI.init();
 
 const storage = {};
-const weatherData = {};
+
 
 
 
