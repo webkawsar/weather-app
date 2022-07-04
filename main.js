@@ -167,6 +167,7 @@ const UI = {
 
     // DOM loaded function
     window.addEventListener('DOMContentLoaded', async ()=> {
+      
       const {country, city} = storage.getItem();
       UI.setToWeatherData(country, city);
 
